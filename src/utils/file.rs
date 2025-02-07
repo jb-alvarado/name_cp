@@ -47,7 +47,7 @@ pub fn rename_files(
             let t_str = t_file.file_name().unwrap().to_string_lossy().to_string();
             let new_file = s_folder.join(&t_str);
 
-            if s_str != t_str && ndl(&s_str, &t_str) > 0.84 {
+            if s_str != t_str && ndl(&s_str, &t_str) > 0.8 {
                 if !new_file.is_file() {
                     info!("Rename file from:\n    <b><magenta>{s_file:?}</></b>\nto:\n    <b><magenta>{new_file:?}</></b>");
 
