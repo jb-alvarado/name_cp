@@ -49,13 +49,15 @@ pub fn rename_files(
 
             if s_str != t_str && ndl(&s_str, &t_str) > 0.84 {
                 if !new_file.is_file() {
-                    if args.rename {
-                        fs::rename(s_file, &new_file)?;
+                    info!("Rename file from:\n    <b><magenta>{s_file:?}</></b>\nto:\n    <b><magenta>{new_file:?}</></b>");
+
+                    if args.rename || args.dry {
+                        if !args.dry {
+                            fs::rename(s_file, &new_file)?;
+                        }
 
                         file_list.push(new_file);
                     } else {
-                        info!("Rename file from:\n    <b><magenta>{s_file:?}</></b>\nto:\n    <b><magenta>{new_file:?}</></b>");
-
                         let rename = Confirm::new("Rename:")
                             .with_default(false)
                             .prompt()
@@ -72,7 +74,7 @@ pub fn rename_files(
                 }
             } else if s_str == t_str {
                 info!("File names match (<b><magenta>{s_str:?}</></b>), nothing to rename...");
-            } else {
+            } else if !args.dry {
                 warn!("File names differs to much, rename anyway?\n    Old: <b><magenta>{s_file:?}</></b>\n    New: <b><magenta>{new_file:?}</></b>");
 
                 let rename = Confirm::new("Rename:")
@@ -85,6 +87,8 @@ pub fn rename_files(
 
                     file_list.push(new_file);
                 }
+            } else {
+                warn!("File names differs to much\n    Old: <b><magenta>{s_file:?}</></b>\n    New: <b><magenta>{new_file:?}</></b>");
             }
         } else {
             warn!("More files exist in the source folder than in the destination. Check manually: <b><magenta>{s_folder:?}</></b>");
@@ -99,20 +103,22 @@ pub fn copy_files(args: &Args, source: Vec<PathBuf>, target: &Path) -> io::Resul
         let file_name = file.file_name().unwrap();
         let new_file = target.join(file_name);
 
-        if args.r#override {
-            fs::remove_file(&new_file)?;
-            fs::copy(&file, &new_file)?;
-        } else {
-            info!("Move file and override existing:\n    <b><magenta>{file:?}</></b>\nto:\n    <b><magenta>{new_file:?}</></b>");
-
-            let over = Confirm::new("Override:")
-                .with_default(false)
-                .prompt()
-                .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
-
-            if over {
+        if !args.dry {
+            if args.r#override {
                 fs::remove_file(&new_file)?;
                 fs::copy(&file, &new_file)?;
+            } else {
+                info!("Move file and override existing:\n    <b><magenta>{file:?}</></b>\nto:\n    <b><magenta>{new_file:?}</></b>");
+
+                let over = Confirm::new("Override:")
+                    .with_default(false)
+                    .prompt()
+                    .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+
+                if over {
+                    fs::remove_file(&new_file)?;
+                    fs::copy(&file, &new_file)?;
+                }
             }
         }
 

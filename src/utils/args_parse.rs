@@ -13,6 +13,12 @@ use log::*;
 next_line_help = false,
 )]
 pub struct Args {
+    #[clap(
+        long,
+        help = "Dry run: do not perform any file operations, only print the various operations"
+    )]
+    pub dry: bool,
+
     #[clap(short, long, help = "Source folder (copy from)")]
     pub source: PathBuf,
 
