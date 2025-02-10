@@ -127,12 +127,12 @@ pub fn copy_files(args: &Args, source: Vec<PathBuf>, target: &Path) -> io::Resul
                 if dur_src > 0.0 && dur_tgt > 0.0 && !is_close(dur_src, dur_tgt, 0.9) {
                     error!("Source and target durations differs: source <yellow>{dur_src:.3?}</>, target: <yellow>{dur_tgt:.3?}</>");
 
-                    let skip = Confirm::new("Skip file:")
+                    let over = Confirm::new("Override:")
                         .with_default(true)
                         .prompt()
                         .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
 
-                    if skip {
+                    if !over {
                         continue;
                     }
                 }
