@@ -19,6 +19,9 @@ pub struct Args {
     )]
     pub dry: bool,
 
+    #[clap(long, help = "Check media duration from source and target file")]
+    pub check: bool,
+
     #[clap(short, long, help = "Source folder (copy from)")]
     pub source: PathBuf,
 

@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.3", features = ["derive"] }
 inquire = "0.7"
+ffprobe = "0.4"
 flexi_logger = { version = "0.29", features = ["colors"] }
 lexical-sort = "0.3"
 log = { version = "0.4", features = ["std", "serde"] }

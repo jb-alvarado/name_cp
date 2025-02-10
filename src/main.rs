@@ -1,5 +1,7 @@
 use std::{fs, io};
 
+use log::*;
+
 mod utils;
 
 use utils::{
@@ -22,6 +24,14 @@ fn main() -> io::Result<()> {
         let target_folder = target_list[0].parent().expect("target parent folder");
 
         copy_files(&args, new_file_list, target_folder)?;
+    } else {
+        if source_list.is_empty() {
+            error!("Source list is empty!");
+        }
+
+        if target_list.is_empty() {
+            error!("Target list is empty!");
+        }
     }
 
     Ok(())

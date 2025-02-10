@@ -4,12 +4,13 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use ffprobe::ffprobe;
 use inquire::Confirm;
 use lexical_sort::{natural_lexical_cmp, PathSort};
 use log::*;
 use strsim::normalized_damerau_levenshtein as ndl;
 
-use crate::utils::args_parse::Args;
+use crate::utils::{args_parse::Args, is_close};
 
 pub fn gather(args: &Args, path: ReadDir) -> io::Result<Vec<PathBuf>> {
     let mut file_list = vec![];
@@ -104,6 +105,38 @@ pub fn copy_files(args: &Args, source: Vec<PathBuf>, target: &Path) -> io::Resul
         let new_file = target.join(file_name);
 
         if !args.dry {
+            if args.check {
+                let probe_src =
+                    ffprobe(&file).map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+                let probe_tgt =
+                    ffprobe(&new_file).map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+
+                let dur_src = probe_src
+                    .format
+                    .duration
+                    .unwrap_or("0.0".to_string())
+                    .parse()
+                    .unwrap();
+                let dur_tgt = probe_tgt
+                    .format
+                    .duration
+                    .unwrap_or("0.0".to_string())
+                    .parse()
+                    .unwrap();
+
+                if dur_src > 0.0 && dur_tgt > 0.0 && !is_close(dur_src, dur_tgt, 0.9) {
+                    error!("Source and target durations differs: source <yellow>{dur_src:.3?}</>, target: <yellow>{dur_tgt:.3?}</>");
+
+                    let skip = Confirm::new("Skip file:")
+                        .with_default(true)
+                        .prompt()
+                        .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+
+                    if skip {
+                        continue;
+                    }
+                }
+            }
             if args.r#override {
                 fs::remove_file(&new_file)?;
                 fs::copy(&file, &new_file)?;
