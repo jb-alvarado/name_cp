@@ -75,6 +75,8 @@ pub fn rename_files(
                 }
             } else if s_str == t_str {
                 info!("File names match (<b><magenta>{s_str:?}</></b>), nothing to rename...");
+
+                file_list.push(new_file);
             } else if !args.dry {
                 warn!("File names differs to much, rename anyway?\n    Old: <b><magenta>{s_file:?}</></b>\n    New: <b><magenta>{new_file:?}</></b>");
 
