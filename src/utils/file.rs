@@ -157,7 +157,7 @@ pub fn copy_files(args: &Args, source: Vec<PathBuf>, target: &Path) -> io::Resul
             }
         }
 
-        info!("Copy file to:\n    <b><magenta>{new_file:?}</></b>");
+        info!("Copy file to: <b><magenta>{new_file:?}</></b>");
     }
 
     Ok(())
